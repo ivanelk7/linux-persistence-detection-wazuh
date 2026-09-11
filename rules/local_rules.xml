@@ -1,0 +1,45 @@
+<!--
+  Règles personnalisées Wazuh pour la détection de persistance Linux
+  Projet : Détection des Mécanismes de Persistance Linux avec Wazuh
+  Auteurs : EL-KHABBAOUI Iliass, MANSOURI Mohamed Amine, KHASSAL Salah Edine
+  Encadrant : Pr. SBAI Oussama — Université Mohammed V de Rabat
+-->
+
+<group name="local,persistence,persistence_project,">
+
+  <!--
+    Règle 100005 — Détection de persistance via FIM
+    Mappe les modifications de fichiers critiques sur MITRE ATT&CK :
+      - T1053 : Scheduled Task/Cron
+      - T1543 : System Services
+      - T1547 : Boot or Logon Initialization Scripts
+  -->
+  <rule id="100005" level="10">
+    <if_sid>550,554</if_sid>
+    <regex>/etc/cron.d|/etc/rc.local|/etc/init.d|/var/spool/cron/crontabs|/etc/systemd/system|/etc/profile|/etc/bash.bashrc</regex>
+    <description>Persistence Activity Detected: Critical system file modified or added</description>
+    <mitre>
+      <id>T1053</id>
+      <id>T1543</id>
+      <id>T1547</id>
+    </mitre>
+  </rule>
+
+  <!--
+    Règle 100006 — Détection comportementale via Auditd
+    Corrèle l'exécution de binaires critiques (découverte, outils réseau,
+    téléchargement, escalade de privilèges) pour détecter les attaques
+    furtives (LD_PRELOAD, fileless).
+    Mappe sur MITRE ATT&CK :
+      - T1059 : Command and Scripting Interpreter
+  -->
+  <rule id="100006" level="10">
+    <if_sid>80700</if_sid>
+    <field name="audit.key">audit-wazuh-c|discovery|network_tools|web_download|priv_esc</field>
+    <description>Behavioral Detection: Suspicious command executed</description>
+    <mitre>
+      <id>T1059</id>
+    </mitre>
+  </rule>
+
+</group>

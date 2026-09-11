@@ -1,0 +1,26 @@
+## =====================================================================
+## Règles Auditd pour la détection comportementale de persistance Linux
+## Projet : Détection des Mécanismes de Persistance Linux avec Wazuh
+## Auteurs : EL-KHABBAOUI Iliass, MANSOURI Mohamed Amine, KHASSAL Salah Edine
+## Encadrant : Pr. SBAI Oussama — Université Mohammed V de Rabat
+## =====================================================================
+
+## 1. Monitor Execution (Who ran what) — clé principale corrélée à Wazuh
+-a exit,always -F arch=b64 -S execve -k audit-wazuh-c
+
+## 2. Monitor Suspicious Discovery Tools
+-w /usr/bin/whoami -p x -k discovery
+-w /usr/bin/id     -p x -k discovery
+
+## 3. Monitor Network Tools (Potential Reverse Shell)
+-w /usr/bin/nc     -p x -k network_tools
+-w /usr/bin/ncat   -p x -k network_tools
+-w /usr/bin/netcat -p x -k network_tools
+
+## 4. Monitor Web Downloads
+-w /usr/bin/curl -p x -k web_download
+-w /usr/bin/wget -p x -k web_download
+
+## 5. Monitor Privilege Escalation attempts
+-w /etc/sudoers -p wa -k priv_esc
+-w /usr/bin/sudo -p x -k priv_esc
